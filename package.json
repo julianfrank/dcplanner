@@ -1,0 +1,27 @@
+{
+  "name": "dcplanner",
+  "version": "1.18.9",
+  "description": "dc planner",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/julianfrank/dcplanner.git"
+  },
+  "author": "Julian Frank",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/julianfrank/dcplanner/issues"
+  },
+  "homepage": "https://github.com/julianfrank/dcplanner#readme",
+  "dependencies": {
+    "vue": "^2.5.17",
+    "vue-hot-reload-api": "^2.3.0"
+  },
+  "devDependencies": {
+    "@vue/component-compiler-utils": "^1.3.1",
+    "vue-template-compiler": "^2.5.17"
+  }
+}
