@@ -7358,68 +7358,7 @@ if (inBrowser) {
 /*  */
 
 exports.default = Vue;
-},{}],12:[function(require,module,exports) {
-var bundleURL = null;
-function getBundleURLCached() {
-  if (!bundleURL) {
-    bundleURL = getBundleURL();
-  }
-
-  return bundleURL;
-}
-
-function getBundleURL() {
-  // Attempt to find the URL of the current script and use that as the base URL
-  try {
-    throw new Error();
-  } catch (err) {
-    var matches = ('' + err.stack).match(/(https?|file|ftp):\/\/[^)\n]+/g);
-    if (matches) {
-      return getBaseURL(matches[0]);
-    }
-  }
-
-  return '/';
-}
-
-function getBaseURL(url) {
-  return ('' + url).replace(/^((?:https?|file|ftp):\/\/.+)\/[^/]+$/, '$1') + '/';
-}
-
-exports.getBundleURL = getBundleURLCached;
-exports.getBaseURL = getBaseURL;
-},{}],11:[function(require,module,exports) {
-var bundle = require('./bundle-url');
-
-function updateLink(link) {
-  var newLink = link.cloneNode();
-  newLink.onload = function () {
-    link.remove();
-  };
-  newLink.href = link.href.split('?')[0] + '?' + Date.now();
-  link.parentNode.insertBefore(newLink, link.nextSibling);
-}
-
-var cssTimeout = null;
-function reloadCSS() {
-  if (cssTimeout) {
-    return;
-  }
-
-  cssTimeout = setTimeout(function () {
-    var links = document.querySelectorAll('link[rel="stylesheet"]');
-    for (var i = 0; i < links.length; i++) {
-      if (bundle.getBaseURL(links[i].href) === bundle.getBundleURL()) {
-        updateLink(links[i]);
-      }
-    }
-
-    cssTimeout = null;
-  }, 50);
-}
-
-module.exports = reloadCSS;
-},{"./bundle-url":12}],13:[function(require,module,exports) {
+},{}],13:[function(require,module,exports) {
 var Vue // late bind
 var version
 var map = (window.__VUE_HOT_MAP__ = Object.create(null))
@@ -7687,14 +7626,34 @@ Object.defineProperty(exports, "__esModule", {
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 exports.default = {
   data: function data() {
     return {
       //Inputs
       ServerLabel: ["S1", "S2", "S3"],
-      ServerPower: [1000, 2000, 4000],
-      ServerSpace: [1, 2, 4],
+      ServerPower: [2000, 3000, 5000],
+      ServerSpace: [2, 3, 5],
       ServerCount: [7, 5, 3],
       RackLabel: ["R1", "R2", "R3", "R4", "R5"],
       RackPower: [10000, 9000, 7000, 5000, 3000],
@@ -7705,6 +7664,69 @@ exports.default = {
   },
   mounted: function mounted() {
     this.N = [[1, 2, 3, 4, 5], [11, 12, 13, 14, 15], [21, 22, 23, 24, 25]];
+  },
+
+  methods: {
+    RowCount: function RowCount(i) {
+      var row = this.N[i] || [],
+          rowSum = row.reduce(function (a, b) {
+        return a + b;
+      }, 0),
+          inputCount = this.ServerCount[i],
+          delta = rowSum - inputCount;
+      return { inputCount: inputCount, rowSum: rowSum, delta: delta };
+    },
+    RowPower: function RowPower(i) {
+      var row = this.N[i] || [],
+          rowPowerSum = this.ServerPower[i] * this.RowCount(i).rowSum,
+          inputPower = this.ServerPower[i] * this.RowCount(i).inputCount,
+          delta = rowPowerSum - inputPower;
+      return { inputPower: inputPower, rowPowerSum: rowPowerSum, delta: delta };
+    },
+    RowSpace: function RowSpace(i) {
+      var row = this.N[i] || [],
+          rowSpaceSum = this.ServerSpace[i] * this.RowCount(i).rowSum,
+          inputSpace = this.ServerSpace[i] * this.RowCount(i).inputCount,
+          delta = rowSpaceSum - inputSpace;
+      return { inputSpace: inputSpace, rowSpaceSum: rowSpaceSum, delta: delta };
+    },
+    ColCount: function ColCount(i) {
+      var col = this.N.map(function (row) {
+        return row[i];
+      }) || [],
+          colSum = col.reduce(function (a, b) {
+        return a + b;
+      }, 0),
+          inputCount = this.RackSpace[i],
+          delta = colSum - inputCount;
+      return { inputCount: inputCount, colSum: colSum, delta: delta };
+    },
+    ColPower: function ColPower(i) {
+      var _this = this;
+
+      var col = this.N.map(function (row) {
+        return row[i];
+      }) || [],
+          colPowerSum = col.reduce(function (a, b, row) {
+        return a + b * _this.ServerPower[row];
+      }, 0),
+          inputPower = this.RackPower[i],
+          delta = colPowerSum - inputPower;
+      return { inputPower: inputPower, colPowerSum: colPowerSum, delta: delta };
+    },
+    ColSpace: function ColSpace(i) {
+      var _this2 = this;
+
+      var col = this.N.map(function (row) {
+        return row[i];
+      }) || [],
+          colSpaceSum = col.reduce(function (a, b, row) {
+        return a + b * _this2.ServerSpace[row];
+      }, 0),
+          inputSpace = this.RackSpace[i],
+          delta = colSpaceSum - inputSpace;
+      return { inputSpace: inputSpace, colSpaceSum: colSpaceSum, delta: delta };
+    }
   }
 };
       var $454a33 = exports.default || module.exports;
@@ -7721,42 +7743,92 @@ exports.default = {
   return _c("div", [
     _c("h3", [_vm._v("Rack Layout")]),
     _vm._v(" "),
-    _c(
-      "table",
-      [
-        _c(
-          "thead",
-          [
-            _c("th", [_vm._v("Server Type")]),
-            _vm._v(" "),
-            _vm._l(_vm.RackLabel, function(rack, rackIndex) {
-              return _c("th", { key: rackIndex }, [
-                _vm._v("\r\n        " + _vm._s(rack) + "\r\n        ")
-              ])
-            })
-          ],
-          2
-        ),
-        _vm._v(" "),
-        _vm._l(_vm.ServerLabel, function(svr, svrIndex) {
-          return _c(
+    _c("table", { attrs: { align: "center" } }, [
+      _c(
+        "thead",
+        [
+          _c("th", [_vm._v("Server Type")]),
+          _vm._v(" "),
+          _vm._l(_vm.RackLabel, function(rack, rackIndex) {
+            return _c("th", { key: rackIndex }, [
+              _vm._v("\r\n        " + _vm._s(rack) + "\r\n        ")
+            ])
+          }),
+          _vm._v(" "),
+          _c("th", [_vm._v("Row Count")]),
+          _vm._v(" "),
+          _c("th", [_vm._v("Row Power")]),
+          _vm._v(" "),
+          _c("th", [_vm._v("Row Space")])
+        ],
+        2
+      ),
+      _vm._v(" "),
+      _c(
+        "tbody",
+        [
+          _vm._l(_vm.ServerLabel, function(svr, svrIndex) {
+            return _c(
+              "tr",
+              { key: svrIndex },
+              [
+                _c("td", [_vm._v(_vm._s(svr))]),
+                _vm._v(" "),
+                _vm._l(_vm.N[svrIndex], function(n, nIndex) {
+                  return _c("td", { key: nIndex }, [
+                    _vm._v("\r\n        " + _vm._s(n) + "\r\n    ")
+                  ])
+                }),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(_vm.RowCount(svrIndex)))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(_vm.RowPower(svrIndex)))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(_vm.RowSpace(svrIndex)))])
+              ],
+              2
+            )
+          }),
+          _vm._v(" "),
+          _c(
             "tr",
-            { key: svrIndex },
             [
-              _c("td", [_vm._v(_vm._s(svr))]),
+              _c("td", [_vm._v("Col Count")]),
               _vm._v(" "),
-              _vm._l(_vm.N[svrIndex], function(n, nIndex) {
-                return _c("td", { key: nIndex }, [
-                  _vm._v("\r\n        " + _vm._s(n) + "\r\n    ")
-                ])
+              _vm._l(_vm.N[0], function(col, i) {
+                return _c("td", { key: i }, [_vm._v(_vm._s(_vm.ColCount(i)))])
+              })
+            ],
+            2
+          ),
+          _vm._v(" "),
+          _c(
+            "tr",
+            [
+              _c("td", [_vm._v("Col Power")]),
+              _vm._v(" "),
+              _vm._l(_vm.N[0], function(col, i) {
+                return _c("td", { key: i }, [_vm._v(_vm._s(_vm.ColPower(i)))])
+              })
+            ],
+            2
+          ),
+          _vm._v(" "),
+          _c(
+            "tr",
+            [
+              _c("td", [_vm._v("Col Space")]),
+              _vm._v(" "),
+              _vm._l(_vm.N[0], function(col, i) {
+                return _c("td", { key: i }, [_vm._v(_vm._s(_vm.ColSpace(i)))])
               })
             ],
             2
           )
-        })
-      ],
-      2
-    )
+        ],
+        2
+      )
+    ])
   ])
 }
 var staticRenderFns = []
@@ -7786,13 +7858,9 @@ render._withStripped = true
         }
 
         
-        var reloadCSS = require('_css_loader');
-        module.hot.dispose(reloadCSS);
-        module.hot.accept(reloadCSS);
-      
       }
     })();
-},{"_css_loader":11,"vue-hot-reload-api":13,"vue":4}],2:[function(require,module,exports) {
+},{"vue-hot-reload-api":13,"vue":4}],2:[function(require,module,exports) {
 "use strict";
 
 var _vue = require("vue");
@@ -7808,7 +7876,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 new _vue2.default({ el: "#app", render: function render(h) {
     return h(_dctool2.default);
   } });
-},{"vue":4,"./dctool":5}],30:[function(require,module,exports) {
+},{"vue":4,"./dctool":5}],49:[function(require,module,exports) {
 
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -7977,5 +8045,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[30,2])
+},{}]},{},[49,2])
 //# sourceMappingURL=/script.98551aa2.map
