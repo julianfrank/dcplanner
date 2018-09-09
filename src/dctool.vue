@@ -1,6 +1,6 @@
 <template>
 <div>
-    <h3>Rack Layout</h3>
+    <h3>Rack Status</h3>
 <table align="center">
 <thead>
     <th>Server Type</th>
@@ -35,6 +35,10 @@
 </tr>
 </tbody>
 </table>
+<br>
+<button @click="this.doIteration">Perform 1 Iteration</button>
+<button>Stop / Pause</button>
+
 </div>    
 </template>
 
@@ -55,56 +59,72 @@ export default {
     };
   },
   mounted() {
-    this.N = [[1, 2, 3, 4, 5], [11, 12, 13, 14, 15], [21, 22, 23, 24, 25]];
+    //Initialize to all 0
+    this.N = this.ServerLabel.map((_, row) =>
+      this.RackLabel.map(() => this.ServerCount[row])
+    );
   },
   methods: {
     RowCount(i) {
       let row = this.N[i] || [],
-        rowSum = row.reduce((a, b) => a + b, 0),
-        inputCount = this.ServerCount[i],
-        delta = rowSum - inputCount;
-      return { inputCount, rowSum, delta };
+        sum = row.reduce((a, b) => a + b, 0),
+        input = this.ServerCount[i],
+        delta = sum - input;
+      return { input, sum, delta };
     },
     RowPower(i) {
       let row = this.N[i] || [],
-        rowPowerSum = this.ServerPower[i] * this.RowCount(i).rowSum,
-        inputPower = this.ServerPower[i] * this.RowCount(i).inputCount,
-        delta = rowPowerSum - inputPower;
-      return { inputPower, rowPowerSum, delta };
+        sum = this.ServerPower[i] * this.RowCount(i).sum,
+        input = this.ServerPower[i] * this.RowCount(i).input,
+        delta = sum - input;
+      return { input, sum, delta };
     },
     RowSpace(i) {
       let row = this.N[i] || [],
-        rowSpaceSum = this.ServerSpace[i] * this.RowCount(i).rowSum,
-        inputSpace = this.ServerSpace[i] * this.RowCount(i).inputCount,
-        delta = rowSpaceSum - inputSpace;
-      return { inputSpace, rowSpaceSum, delta };
+        sum = this.ServerSpace[i] * this.RowCount(i).sum,
+        input = this.ServerSpace[i] * this.RowCount(i).input,
+        delta = sum - input;
+      return { input, sum, delta };
     },
     ColCount(i) {
       let col = this.N.map(row => row[i]) || [],
-        colSum = col.reduce((a, b) => a + b, 0),
-        inputCount = this.RackSpace[i],
-        delta = colSum - inputCount;
-      return { inputCount, colSum, delta };
+        sum = col.reduce((a, b) => a + b, 0),
+        input = this.RackSpace[i],
+        delta = sum - input;
+      return { input, sum, delta };
     },
     ColPower(i) {
       let col = this.N.map(row => row[i]) || [],
-        colPowerSum = col.reduce(
-          (a, b, row) => a + b * this.ServerPower[row],
-          0
-        ),
-        inputPower = this.RackPower[i],
-        delta = colPowerSum - inputPower;
-      return { inputPower, colPowerSum, delta };
+        sum = col.reduce((a, b, row) => a + b * this.ServerPower[row], 0),
+        input = this.RackPower[i],
+        delta = sum - input;
+      return { input, sum, delta };
     },
     ColSpace(i) {
       let col = this.N.map(row => row[i]) || [],
-        colSpaceSum = col.reduce(
-          (a, b, row) => a + b * this.ServerSpace[row],
-          0
-        ),
-        inputSpace = this.RackSpace[i],
-        delta = colSpaceSum - inputSpace;
-      return { inputSpace, colSpaceSum, delta };
+        sum = col.reduce((a, b, row) => a + b * this.ServerSpace[row], 0),
+        input = this.RackSpace[i],
+        delta = sum - input;
+      return { input, sum, delta };
+    },
+    doIteration() {
+      this.N = this.N.map((rowValue, row) => {
+        return rowValue.map((val, col) => {
+          let deltaCount = this.RowCount(row).delta,
+            deltaPower = this.ColPower(col).delta,
+            deltaSpace = this.ColSpace(col).delta;
+          console.log(row, col, val, deltaCount, deltaPower, deltaSpace);
+          if (deltaCount < 0) {
+            return val + 1;
+          } else if (deltaPower > 0 && deltaSpace > 0) {
+            return val == 0 ? val : val - 1;
+          } else if (deltaCount == 0) {
+            return val;
+          } else {
+            return val;
+          }
+        });
+      });
     }
   }
 };

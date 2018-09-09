@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/julianfrank/dcplanner#readme",
   "dependencies": {
+    "javascript-lp-solver": "^0.4.5",
     "vue": "^2.5.17",
     "vue-hot-reload-api": "^2.3.0"
   },

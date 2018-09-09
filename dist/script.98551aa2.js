@@ -77,7 +77,7 @@ parcelRequire = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({4:[function(require,module,exports) {
+})({3:[function(require,module,exports) {
 var global = (1,eval)("this");
 'use strict';
 
@@ -7358,7 +7358,7 @@ if (inBrowser) {
 /*  */
 
 exports.default = Vue;
-},{}],13:[function(require,module,exports) {
+},{}],5:[function(require,module,exports) {
 var Vue // late bind
 var version
 var map = (window.__VUE_HOT_MAP__ = Object.create(null))
@@ -7600,12 +7600,16 @@ exports.reload = tryWrap(function (id, options) {
   })
 })
 
-},{}],5:[function(require,module,exports) {
+},{}],4:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+//
+//
+//
+//
 //
 //
 //
@@ -7663,69 +7667,97 @@ exports.default = {
     };
   },
   mounted: function mounted() {
-    this.N = [[1, 2, 3, 4, 5], [11, 12, 13, 14, 15], [21, 22, 23, 24, 25]];
+    var _this = this;
+
+    //Initialize to all 0
+    this.N = this.ServerLabel.map(function (_, row) {
+      return _this.RackLabel.map(function () {
+        return _this.ServerCount[row];
+      });
+    });
   },
 
   methods: {
     RowCount: function RowCount(i) {
       var row = this.N[i] || [],
-          rowSum = row.reduce(function (a, b) {
+          sum = row.reduce(function (a, b) {
         return a + b;
       }, 0),
-          inputCount = this.ServerCount[i],
-          delta = rowSum - inputCount;
-      return { inputCount: inputCount, rowSum: rowSum, delta: delta };
+          input = this.ServerCount[i],
+          delta = sum - input;
+      return { input: input, sum: sum, delta: delta };
     },
     RowPower: function RowPower(i) {
       var row = this.N[i] || [],
-          rowPowerSum = this.ServerPower[i] * this.RowCount(i).rowSum,
-          inputPower = this.ServerPower[i] * this.RowCount(i).inputCount,
-          delta = rowPowerSum - inputPower;
-      return { inputPower: inputPower, rowPowerSum: rowPowerSum, delta: delta };
+          sum = this.ServerPower[i] * this.RowCount(i).sum,
+          input = this.ServerPower[i] * this.RowCount(i).input,
+          delta = sum - input;
+      return { input: input, sum: sum, delta: delta };
     },
     RowSpace: function RowSpace(i) {
       var row = this.N[i] || [],
-          rowSpaceSum = this.ServerSpace[i] * this.RowCount(i).rowSum,
-          inputSpace = this.ServerSpace[i] * this.RowCount(i).inputCount,
-          delta = rowSpaceSum - inputSpace;
-      return { inputSpace: inputSpace, rowSpaceSum: rowSpaceSum, delta: delta };
+          sum = this.ServerSpace[i] * this.RowCount(i).sum,
+          input = this.ServerSpace[i] * this.RowCount(i).input,
+          delta = sum - input;
+      return { input: input, sum: sum, delta: delta };
     },
     ColCount: function ColCount(i) {
       var col = this.N.map(function (row) {
         return row[i];
       }) || [],
-          colSum = col.reduce(function (a, b) {
+          sum = col.reduce(function (a, b) {
         return a + b;
       }, 0),
-          inputCount = this.RackSpace[i],
-          delta = colSum - inputCount;
-      return { inputCount: inputCount, colSum: colSum, delta: delta };
+          input = this.RackSpace[i],
+          delta = sum - input;
+      return { input: input, sum: sum, delta: delta };
     },
     ColPower: function ColPower(i) {
-      var _this = this;
-
-      var col = this.N.map(function (row) {
-        return row[i];
-      }) || [],
-          colPowerSum = col.reduce(function (a, b, row) {
-        return a + b * _this.ServerPower[row];
-      }, 0),
-          inputPower = this.RackPower[i],
-          delta = colPowerSum - inputPower;
-      return { inputPower: inputPower, colPowerSum: colPowerSum, delta: delta };
-    },
-    ColSpace: function ColSpace(i) {
       var _this2 = this;
 
       var col = this.N.map(function (row) {
         return row[i];
       }) || [],
-          colSpaceSum = col.reduce(function (a, b, row) {
-        return a + b * _this2.ServerSpace[row];
+          sum = col.reduce(function (a, b, row) {
+        return a + b * _this2.ServerPower[row];
       }, 0),
-          inputSpace = this.RackSpace[i],
-          delta = colSpaceSum - inputSpace;
-      return { inputSpace: inputSpace, colSpaceSum: colSpaceSum, delta: delta };
+          input = this.RackPower[i],
+          delta = sum - input;
+      return { input: input, sum: sum, delta: delta };
+    },
+    ColSpace: function ColSpace(i) {
+      var _this3 = this;
+
+      var col = this.N.map(function (row) {
+        return row[i];
+      }) || [],
+          sum = col.reduce(function (a, b, row) {
+        return a + b * _this3.ServerSpace[row];
+      }, 0),
+          input = this.RackSpace[i],
+          delta = sum - input;
+      return { input: input, sum: sum, delta: delta };
+    },
+    doIteration: function doIteration() {
+      var _this4 = this;
+
+      this.N = this.N.map(function (rowValue, row) {
+        return rowValue.map(function (val, col) {
+          var deltaCount = _this4.RowCount(row).delta,
+              deltaPower = _this4.ColPower(col).delta,
+              deltaSpace = _this4.ColSpace(col).delta;
+          console.log(row, col, val, deltaCount, deltaPower, deltaSpace);
+          if (deltaCount < 0) {
+            return val + 1;
+          } else if (deltaPower > 0 && deltaSpace > 0) {
+            return val == 0 ? val : val - 1;
+          } else if (deltaCount == 0) {
+            return val;
+          } else {
+            return val;
+          }
+        });
+      });
     }
   }
 };
@@ -7741,7 +7773,7 @@ exports.default = {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
-    _c("h3", [_vm._v("Rack Layout")]),
+    _c("h3", [_vm._v("Rack Status")]),
     _vm._v(" "),
     _c("table", { attrs: { align: "center" } }, [
       _c(
@@ -7828,7 +7860,15 @@ exports.default = {
         ],
         2
       )
-    ])
+    ]),
+    _vm._v(" "),
+    _c("br"),
+    _vm._v(" "),
+    _c("button", { on: { click: this.doIteration } }, [
+      _vm._v("Perform 1 Iteration")
+    ]),
+    _vm._v(" "),
+    _c("button", [_vm._v("Stop / Pause")])
   ])
 }
 var staticRenderFns = []
@@ -7860,7 +7900,7 @@ render._withStripped = true
         
       }
     })();
-},{"vue-hot-reload-api":13,"vue":4}],2:[function(require,module,exports) {
+},{"vue-hot-reload-api":5,"vue":3}],2:[function(require,module,exports) {
 "use strict";
 
 var _vue = require("vue");
@@ -7876,7 +7916,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 new _vue2.default({ el: "#app", render: function render(h) {
     return h(_dctool2.default);
   } });
-},{"vue":4,"./dctool":5}],49:[function(require,module,exports) {
+},{"vue":3,"./dctool":4}],6:[function(require,module,exports) {
 
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -7904,9 +7944,9 @@ module.bundle.Module = Module;
 
 var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
-  var hostname = undefined || location.hostname;
+  var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '60665' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '53661' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -8045,5 +8085,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[49,2])
+},{}]},{},[6,2])
 //# sourceMappingURL=/script.98551aa2.map
