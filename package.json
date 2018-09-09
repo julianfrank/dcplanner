@@ -4,7 +4,7 @@
   "description": "dc planner",
   "main": "app.js",
   "scripts": {
-    "test": "node app.js"
+    "dev": "parcel src"
   },
   "repository": {
     "type": "git",

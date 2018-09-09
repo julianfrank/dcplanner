@@ -7671,33 +7671,40 @@ Object.defineProperty(exports, "__esModule", {
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
-/*function tv(stuff) {
-  document.getElementById("tv").innerHTML = "";
-  document.getElementById("tv").innerHTML = stuff;
-}
-tv("test TV");
-function con(stuff) {
-  document.getElementById("console").innerHTML += `<br>` + stuff;
-}
-con("test CON");
-
-//Array for output
-let N = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]; //rows=>Rack position,columns=>Server Type
-//Arrays for Input
-let ServerLabel = ["S1", "S2", "S3"],
-  ServerPower = [1000, 2000, 4000],
-  ServerSpace = [1, 2, 4],
-  ServerCount = [7, 5, 3],
-  RackLabel = ["R1", "R2", "R3", "R4", "R5"],
-  RackPower = [10000, 9000, 7000, 5000, 3000],
-  RackSpace = [10, 9, 7, 5, 3];
-
-function showOutput() {}
-*/
 exports.default = {
   data: function data() {
-    return { a: "a" };
+    return {
+      //Inputs
+      ServerLabel: ["S1", "S2", "S3"],
+      ServerPower: [1000, 2000, 4000],
+      ServerSpace: [1, 2, 4],
+      ServerCount: [7, 5, 3],
+      RackLabel: ["R1", "R2", "R3", "R4", "R5"],
+      RackPower: [10000, 9000, 7000, 5000, 3000],
+      RackSpace: [10, 9, 7, 5, 3],
+      //Outputs
+      N: [[]] //rows=>Server type,columns=>Rack Position
+    };
+  },
+  mounted: function mounted() {
+    this.N = [[1, 2, 3, 4, 5], [11, 12, 13, 14, 15], [21, 22, 23, 24, 25]];
   }
 };
       var $454a33 = exports.default || module.exports;
@@ -7711,7 +7718,46 @@ exports.default = {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [_vm._v("hi" + _vm._s(_vm.a))])
+  return _c("div", [
+    _c("h3", [_vm._v("Rack Layout")]),
+    _vm._v(" "),
+    _c(
+      "table",
+      [
+        _c(
+          "thead",
+          [
+            _c("th", [_vm._v("Server Type")]),
+            _vm._v(" "),
+            _vm._l(_vm.RackLabel, function(rack, rackIndex) {
+              return _c("th", { key: rackIndex }, [
+                _vm._v("\r\n        " + _vm._s(rack) + "\r\n        ")
+              ])
+            })
+          ],
+          2
+        ),
+        _vm._v(" "),
+        _vm._l(_vm.ServerLabel, function(svr, svrIndex) {
+          return _c(
+            "tr",
+            { key: svrIndex },
+            [
+              _c("td", [_vm._v(_vm._s(svr))]),
+              _vm._v(" "),
+              _vm._l(_vm.N[svrIndex], function(n, nIndex) {
+                return _c("td", { key: nIndex }, [
+                  _vm._v("\r\n        " + _vm._s(n) + "\r\n    ")
+                ])
+              })
+            ],
+            2
+          )
+        })
+      ],
+      2
+    )
+  ])
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -7762,7 +7808,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 new _vue2.default({ el: "#app", render: function render(h) {
     return h(_dctool2.default);
   } });
-},{"vue":4,"./dctool":5}],16:[function(require,module,exports) {
+},{"vue":4,"./dctool":5}],30:[function(require,module,exports) {
 
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -7790,7 +7836,7 @@ module.bundle.Module = Module;
 
 var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
-  var hostname = '' || location.hostname;
+  var hostname = undefined || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
   var ws = new WebSocket(protocol + '://' + hostname + ':' + '60665' + '/');
   ws.onmessage = function (event) {
@@ -7931,5 +7977,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[16,2])
+},{}]},{},[30,2])
 //# sourceMappingURL=/script.98551aa2.map
