@@ -1,10 +1,5 @@
 <template>
 <div>
-  {{Model}}
-<br>
-<button @click="this.buildModel">Build Model</button>
-<button>Stop / Pause</button>
-<br>
     <h3>Rack Status</h3>
 <table align="center">
 <thead>
@@ -40,14 +35,14 @@
 </tr>
 </tbody>
 </table>
-
+<br>
+<button @click="this.doIteration">Perform 1 Iteration</button>
+<button>Stop / Pause</button>
 
 </div>    
 </template>
 
 <script>
-import * as lpSolver from "javascript-lp-solver";
-console.log(lpSolver);
 export default {
   data() {
     return {
@@ -60,9 +55,7 @@ export default {
       RackPower: [10000, 9000, 7000, 5000, 3000],
       RackSpace: [10, 9, 7, 5, 3],
       //Outputs
-      N: [[]], //rows=>Server type,columns=>Rack Position
-      //Model for lp
-      Model: {}
+      N: [[]] //rows=>Server type,columns=>Rack Position
     };
   },
   mounted() {
@@ -114,19 +107,24 @@ export default {
         delta = sum - input;
       return { input, sum, delta };
     },
-    buildModel() {
-      let optimize = {},
-        variables = {};
-      this.ServerLabel.forEach((label, row) => {
-        optimize[label] = {
-          space: this.ServerSpace[row],
-          power: this.ServerPower[row]
-        };
+    doIteration() {
+      this.N = this.N.map((rowValue, row) => {
+        return rowValue.map((val, col) => {
+          let deltaCount = this.RowCount(row).delta,
+            deltaPower = this.ColPower(col).delta,
+            deltaSpace = this.ColSpace(col).delta;
+          console.log(row, col, val, deltaCount, deltaPower, deltaSpace);
+          if (deltaCount < 0) {
+            return val + 1;
+          } else if (deltaPower > 0 && deltaSpace > 0) {
+            return val == 0 ? val : val - 1;
+          } else if (deltaCount == 0) {
+            return val;
+          } else {
+            return val;
+          }
+        });
       });
-      let constraints = this.RackLabel.map((label,row)=>{
-        
-      });
-      this.Model = { optimize, variables, constraints };
     }
   }
 };
