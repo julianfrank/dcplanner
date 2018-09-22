@@ -135,7 +135,7 @@ export default {
             this.output[label] = 0;
             mySystem.addVariable(label, this.output, label);
             //Ensure solution count is 0 or +ve
-            let cons = `${label} >=0`;
+            let cons = `${label} >= 0`;
             console.debug('Going to add Constraint ', cons);
             mySystem.addConstraint(cons);
             //ensure count is integet :wink:[Not working ]
