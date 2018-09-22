@@ -86,7 +86,7 @@ export default {
       solution: {},
       input: {},
       output: {},
-      busy: false
+      busy: true
     };
   },
   mounted() {},
