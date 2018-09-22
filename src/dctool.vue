@@ -77,11 +77,11 @@ window.onerror = err => alert('Error=> ' + JSON.stringify(err));
 export default {
   data() {
     return {
-      rackCaps: [10],
+      rackCaps: [10, 7, 5],
       newRackCaps: 0,
-      serverCaps: [1],
+      serverCaps: [1, 2, 4],
       newServerCap: 0,
-      serverCounts: [1],
+      serverCounts: [5, 3, 1],
       newServerCount: 0,
       solution: {},
       input: {},
