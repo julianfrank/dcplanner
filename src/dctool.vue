@@ -10,12 +10,15 @@
     input:{{input}}<br>
     output:{{output}}<br>
 </div>
+
+<h1> DC Top Up Tool</h1>
+<p>Use this tool to quickly plan which servers to place in which Pre-Occupied Rack</p>
 <table>
   <caption>Rack Inputs</caption>
   <tr>
     <th>RUs Available</th>
     <th  v-for="(rack,ind) in racks" :key="ind" >Rack{{rack}}</th>
-    <th>Rack{{racks+1}} <br>Change to add this Rack</th>
+    <th>Add Rack<br>Change to add this Rack</th>
   </tr>
   <tr>
     <td>RU in each Rack</td>
@@ -30,7 +33,7 @@
   <tr>
     <th>Specs</th>
     <th  v-for="(server,ind) in servers" :key="ind">Server Type {{ind+1}}</th>
-    <th>Server Type {{servers+1}}<br>Change Value to add new Server Type</th>
+    <th>Add Server Type<br>Change Value to add new Server Type</th>
   </tr>
   <tr>
     <td>Count</td>
@@ -59,7 +62,11 @@
     <td v-for="(val,c_ind) in row" :key="c_ind">{{val}}</td>
   </tr>
 </table>
-
+<br>
+<p>This is an Open Source Project with code hosted in <a href="https://github.com/julianfrank/dcplanner">https://github.com/julianfrank/dcplanner</p>
+<p>If you liked this please do Star this Project in Github</p>
+<p>Also for any new features or issues you discover please raise an issue in Github</p>
+<p>Thanks</p>
   </div>
 </template>
 
@@ -110,6 +117,7 @@ export default {
       this.busy = false;
     },
     evaluate() {
+      if (this.racks < 1 || this.servers < 1) return;
       this.busy = true;
       //Init Input object
       this.rackCaps.forEach((val, ind) => {
@@ -170,6 +178,7 @@ export default {
         mySystem.resolve();
       } catch (error) {
         alert('Solution NOT Feasible');
+        console.error(error);
         this.busy = false;
       }
     },
@@ -189,5 +198,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+
