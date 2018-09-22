@@ -72,7 +72,7 @@
 
 <script>
 import Constrained from 'constrained';
-var mySystem = new Constrained.System();
+
 window.onerror = err => alert('Error=> ' + JSON.stringify(err));
 export default {
   data() {
@@ -118,6 +118,7 @@ export default {
     },
     evaluate() {
       if (this.racks < 1 || this.servers < 1) return;
+      var mySystem = new Constrained.System();
       this.busy = true;
       //Init Input object
       this.rackCaps.forEach((val, ind) => {
@@ -156,11 +157,12 @@ export default {
         for (let s = 1; s <= this.servers; s++) {
           let cons = '';
           for (let r = 1; r <= this.racks; r++) {
-            cons += `s${s}r${r}` + (r == this.racks ? ` = s${s}count"` : ' + ');
+            cons += `s${s}r${r}` + (r == this.racks ? ` >= s${s}count"` : ' + ');
           }
           console.debug('Going to add Constraint ', cons);
           mySystem.addConstraint(cons);
         }
+
         for (let r = 1; r <= this.racks; r++) {
           let cons = '';
           for (let s = 1; s <= this.servers; s++) {
