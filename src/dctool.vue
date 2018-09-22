@@ -77,16 +77,16 @@ window.onerror = err => alert('Error=> ' + JSON.stringify(err));
 export default {
   data() {
     return {
-      rackCaps: [],
+      rackCaps: [10],
       newRackCaps: 0,
-      serverCaps: [],
+      serverCaps: [1],
       newServerCap: 0,
-      serverCounts: [],
+      serverCounts: [1],
       newServerCount: 0,
       solution: {},
       input: {},
       output: {},
-      busy: true
+      busy: false
     };
   },
   mounted() {},
