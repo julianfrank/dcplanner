@@ -1,6 +1,15 @@
 <template>
   <div>
     
+    <div hidden>
+    racks:{{racks}}<br>
+    servers:{{servers}}<br>
+    serverCaps:{{serverCaps}}<br>
+    serverCounts:{{serverCounts}}<br>
+    solution:{{solution}}<br>
+    input:{{input}}<br>
+    output:{{output}}<br>
+</div>
 <table>
   <caption>Rack Inputs</caption>
   <tr>
@@ -34,9 +43,11 @@
     <td><input type="number" min="1" max="12" v-model.number="newServerCap" @change="addServerCap"/></td>
     </tr>
 </table>
+
 <br>
-<button @click="evaluate">Evaluate</button>
+<button :disabled="busy" @click="evaluate">Evaluate</button>
 <br>
+
 <table>
   <caption>Output</caption>
   <tr>
@@ -59,15 +70,16 @@ var mySystem = new Constrained.System();
 export default {
   data() {
     return {
-      rackCaps: [13, 11, 7],
+      rackCaps: [],
       newRackCaps: 0,
-      serverCaps: [1, 2],
+      serverCaps: [],
       newServerCap: 0,
-      serverCounts: [7, 11],
+      serverCounts: [],
       newServerCount: 0,
       solution: {},
       input: {},
-      output: {}
+      output: {},
+      busy: false
     };
   },
   mounted() {},
@@ -95,7 +107,7 @@ export default {
       if (this.serverCounts.length > this.serverCaps.length) this.serverCaps.push(this.newServerCap);
     },
     evaluate() {
-      this.input = {};
+      this.busy = true;
       //Init Input object
       this.rackCaps.forEach((val, ind) => {
         let label = `r${ind + 1}cap`;
@@ -147,11 +159,15 @@ export default {
           mySystem.addConstraint(cons);
         }
         //Setup Solution Hooks
-        mySystem.onNewSolution(solution => (this.solution = solution), this.output);
+        mySystem.onNewSolution(solution => {
+          this.busy = false;
+          this.solution = solution;
+        }, this.output);
         //resolve
         mySystem.resolve();
       } catch (error) {
         alert('Solution NOT Feasible');
+        this.busy = false;
       }
     },
     outputMat() {

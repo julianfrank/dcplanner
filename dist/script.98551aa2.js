@@ -8875,19 +8875,31 @@ var mySystem = new _constrained2.default.System(); //
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 exports.default = {
   data: function data() {
     return {
-      rackCaps: [13, 11, 7],
+      rackCaps: [],
       newRackCaps: 0,
-      serverCaps: [1, 2],
+      serverCaps: [],
       newServerCap: 0,
-      serverCounts: [7, 11],
+      serverCounts: [],
       newServerCount: 0,
       solution: {},
       input: {},
-      output: {}
+      output: {},
+      busy: false
     };
   },
   mounted: function mounted() {},
@@ -8918,7 +8930,7 @@ exports.default = {
     evaluate: function evaluate() {
       var _this = this;
 
-      this.input = {};
+      this.busy = true;
       //Init Input object
       this.rackCaps.forEach(function (val, ind) {
         var label = 'r' + (ind + 1) + 'cap';
@@ -8971,12 +8983,14 @@ exports.default = {
         }
         //Setup Solution Hooks
         mySystem.onNewSolution(function (solution) {
-          return _this.solution = solution;
+          _this.busy = false;
+          _this.solution = solution;
         }, this.output);
         //resolve
         mySystem.resolve();
       } catch (error) {
         alert('Solution NOT Feasible');
+        this.busy = false;
       }
     },
     outputMat: function outputMat() {
@@ -9005,6 +9019,23 @@ exports.default = {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
+    _c("div", { attrs: { hidden: "" } }, [
+      _vm._v("\n    racks:" + _vm._s(_vm.racks)),
+      _c("br"),
+      _vm._v("\n    servers:" + _vm._s(_vm.servers)),
+      _c("br"),
+      _vm._v("\n    serverCaps:" + _vm._s(_vm.serverCaps)),
+      _c("br"),
+      _vm._v("\n    serverCounts:" + _vm._s(_vm.serverCounts)),
+      _c("br"),
+      _vm._v("\n    solution:" + _vm._s(_vm.solution)),
+      _c("br"),
+      _vm._v("\n    input:" + _vm._s(_vm.input)),
+      _c("br"),
+      _vm._v("\n    output:" + _vm._s(_vm.output)),
+      _c("br")
+    ]),
+    _vm._v(" "),
     _c("table", [
       _c("caption", [_vm._v("Rack Inputs")]),
       _vm._v(" "),
@@ -9250,7 +9281,11 @@ exports.default = {
     _vm._v(" "),
     _c("br"),
     _vm._v(" "),
-    _c("button", { on: { click: _vm.evaluate } }, [_vm._v("Evaluate")]),
+    _c(
+      "button",
+      { attrs: { disabled: _vm.busy }, on: { click: _vm.evaluate } },
+      [_vm._v("Evaluate")]
+    ),
     _vm._v(" "),
     _c("br"),
     _vm._v(" "),
@@ -9339,7 +9374,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 new _vue2.default({ el: "#app", render: function render(h) {
     return h(_dctool2.default);
   } });
-},{"vue":4,"./dctool":5}],97:[function(require,module,exports) {
+},{"vue":4,"./dctool":5}],102:[function(require,module,exports) {
 
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -9508,5 +9543,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[97,2])
+},{}]},{},[102,2])
 //# sourceMappingURL=/script.98551aa2.map
