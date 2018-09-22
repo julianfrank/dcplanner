@@ -66,7 +66,7 @@
 <script>
 import Constrained from 'constrained';
 var mySystem = new Constrained.System();
-
+window.onerror = err => alert('Error=> ' + JSON.stringify(err));
 export default {
   data() {
     return {
@@ -95,16 +95,19 @@ export default {
     addRack() {
       this.rackCaps.push(this.newRackCaps);
       this.newRackCaps = 0;
+      this.busy = false;
     },
     addServerCap() {
       this.serverCaps.push(this.newServerCap);
       this.newServerCap = 0;
       if (this.serverCaps.length > this.serverCounts.length) this.serverCounts.push(this.newServerCount);
+      this.busy = false;
     },
     addServerCount() {
       this.serverCounts.push(this.newServerCount);
       this.newServerCount = 0;
       if (this.serverCounts.length > this.serverCaps.length) this.serverCaps.push(this.newServerCap);
+      this.busy = false;
     },
     evaluate() {
       this.busy = true;
