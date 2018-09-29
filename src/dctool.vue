@@ -9,10 +9,13 @@
     solution:{{solution}}<br>
     input:{{input}}<br>
     output:{{output}}<br>
-</div>
+    </div>
 
 <h1> DC Top Up Tool</h1>
 <p>Use this tool to quickly plan which servers to place in which Pre-Occupied Rack</p>
+
+Import:<input @change="importConfig" type="file">
+
 <table>
   <caption>Rack Inputs</caption>
   <tr>
@@ -50,6 +53,8 @@
 <br>
 <button :disabled="busy" @click="evaluate">Evaluate</button>
 <br>
+<a  id="jsonExport" ></a>
+<br>
 
 <table>
   <caption>Output</caption>
@@ -67,13 +72,16 @@
 <p>If you liked this please do Star this Project in Github</p>
 <p>Also for any new features or issues you discover please raise an issue in Github</p>
 <p>Thanks</p>
+<p>Julian Frank</p>
+<br>
+<p>Known Issue -> In some Combination the Output show floats (3.5, 5.5 etc...)</p>
   </div>
 </template>
 
 <script>
-import Constrained from 'constrained';
+import Constrained from "constrained";
 
-window.onerror = err => alert('Error=> ' + JSON.stringify(err));
+window.onerror = err => alert("Error=> " + JSON.stringify(err));
 export default {
   data() {
     return {
@@ -86,7 +94,8 @@ export default {
       solution: {},
       input: {},
       output: {},
-      busy: false
+      busy: false,
+      appVersion: 180929
     };
   },
   mounted() {},
@@ -99,6 +108,50 @@ export default {
     }
   },
   methods: {
+    exportConfig() {
+      let exportPack = {
+        rackCaps: this.rackCaps,
+        serverCaps: this.serverCaps,
+        serverCounts: this.serverCounts,
+        output: JSON.parse(JSON.stringify(this.output)),
+        appVersion: this.appVersion,
+        exportDate: new Date()
+      };
+
+      var jsonse = JSON.stringify(exportPack);
+      var blob = new Blob([jsonse], { type: "application/json" });
+      var url = URL.createObjectURL(blob);
+
+      var a = document.getElementById("jsonExport");
+      a.href = url;
+      a.download = `JF dcplanner ${new Date()}.json`;
+      a.textContent = `Download -> JF dcplanner ${new Date()}.json`;
+    },
+
+    importConfig(event) {
+      let filesSelected = event.target.files;
+
+      if (filesSelected.length > 0) {
+        let file = filesSelected[0];
+        if (file.type == "application/json") {
+          let fr = new FileReader();
+          fr.onload = e => {
+            let data = JSON.parse(e.target.result);
+            if (data.appVersion != this.appVersion)
+              alert("Looks like this was created in a previous version...");
+            this.rackCaps = data.rackCaps;
+            this.serverCaps = data.serverCaps;
+            this.serverCounts = data.serverCounts;
+            this.output = data.output;
+            alert("Imported");
+          };
+          fr.readAsText(file);
+        } else {
+          alert(`Wrong File Type(${file.type}). Please select a JSON file`);
+        }
+      }
+    },
+
     addRack() {
       this.rackCaps.push(this.newRackCaps);
       this.newRackCaps = 0;
@@ -107,13 +160,15 @@ export default {
     addServerCap() {
       this.serverCaps.push(this.newServerCap);
       this.newServerCap = 0;
-      if (this.serverCaps.length > this.serverCounts.length) this.serverCounts.push(this.newServerCount);
+      if (this.serverCaps.length > this.serverCounts.length)
+        this.serverCounts.push(this.newServerCount);
       this.busy = false;
     },
     addServerCount() {
       this.serverCounts.push(this.newServerCount);
       this.newServerCount = 0;
-      if (this.serverCounts.length > this.serverCaps.length) this.serverCaps.push(this.newServerCap);
+      if (this.serverCounts.length > this.serverCaps.length)
+        this.serverCaps.push(this.newServerCap);
       this.busy = false;
     },
     evaluate() {
@@ -145,7 +200,7 @@ export default {
             mySystem.addVariable(label, this.output, label);
             //Ensure solution count is 0 or +ve
             let cons = `${label} >= 0`;
-            console.debug('Going to add Constraint ', cons);
+            console.debug("Going to add Constraint ", cons);
             mySystem.addConstraint(cons);
             //ensure count is integet :wink:[Not working ]
             //cons = `10000000000*(${label}+1)/10000000000/(${label}+1) = 1`;
@@ -155,20 +210,23 @@ export default {
         }
         //Add constraints
         for (let s = 1; s <= this.servers; s++) {
-          let cons = '';
+          let cons = "";
           for (let r = 1; r <= this.racks; r++) {
-            cons += `s${s}r${r}` + (r == this.racks ? ` >= s${s}count"` : ' + ');
+            cons +=
+              `s${s}r${r}` + (r == this.racks ? ` >= s${s}count"` : " + ");
           }
-          console.debug('Going to add Constraint ', cons);
+          console.debug("Going to add Constraint ", cons);
           mySystem.addConstraint(cons);
         }
 
         for (let r = 1; r <= this.racks; r++) {
-          let cons = '';
+          let cons = "";
           for (let s = 1; s <= this.servers; s++) {
-            cons += `s${s}r${r}*s${s}cap` + (s == this.servers ? ` <= r${r}cap` : ' + ');
+            cons +=
+              `s${s}r${r}*s${s}cap` +
+              (s == this.servers ? ` <= r${r}cap` : " + ");
           }
-          console.debug('Going to add Constraint ', cons);
+          console.debug("Going to add Constraint ", cons);
           mySystem.addConstraint(cons);
         }
         //Setup Solution Hooks
@@ -178,8 +236,10 @@ export default {
         }, this.output);
         //resolve
         mySystem.resolve();
+        //Ready for export
+        this.exportConfig();
       } catch (error) {
-        alert('Solution NOT Feasible');
+        alert("Solution NOT Feasible");
         console.error(error);
         this.busy = false;
       }

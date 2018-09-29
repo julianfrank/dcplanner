@@ -1,0 +1,7 @@
+{
+  "files.autoSave": "afterDelay",
+  "editor.tabSize": 2,
+  "editor.renderWhitespace": "boundary",
+  "editor.wordWrap": "on",
+  "editor.wordWrapColumn": 144
+}
