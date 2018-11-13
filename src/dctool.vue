@@ -11,7 +11,7 @@
     output:{{output}}<br>
     </div>
 
-<h1> DC Top Up Tool</h1>
+<h1> DC Top Up Tool</h1><h4>Version:{{appVersion}}</h4>
 <p>Use this tool to quickly plan which servers to place in which Pre-Occupied Rack</p>
 
 Import:<input @change="importConfig" type="file">
