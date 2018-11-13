@@ -74,14 +74,15 @@ Import:<input @change="importConfig" type="file">
 <p>Thanks</p>
 <p>Julian Frank</p>
 <br>
-<p>Known Issue -> In some Combination the Output show floats (3.5, 5.5 etc...)</p>
+<del>Known Issue -> In some Combination the Output show floats (3.5, 5.5 etc...)</del>Resolved as on 13thNov2018
   </div>
 </template>
 
 <script>
-import Constrained from "constrained";
+import * as solver from "javascript-lp-solver";
 
 window.onerror = err => alert("Error=> " + JSON.stringify(err));
+
 export default {
   data() {
     return {
@@ -171,85 +172,70 @@ export default {
         this.serverCaps.push(this.newServerCap);
       this.busy = false;
     },
+
     evaluate() {
       if (this.racks < 1 || this.servers < 1) return;
-      var mySystem = new Constrained.System();
-      this.busy = true;
-      //Init Input object
-      this.rackCaps.forEach((val, ind) => {
-        let label = `r${ind + 1}cap`;
-        this.input[label] = val;
-        mySystem.addConstant(label, this.input, label);
-      });
-      this.serverCaps.forEach((val, ind) => {
-        let label = `s${ind + 1}cap`;
-        this.input[label] = val;
-        mySystem.addConstant(label, this.input, label);
-      });
-      this.serverCounts.forEach((val, ind) => {
-        let label = `s${ind + 1}count`;
-        this.input[label] = val;
-        mySystem.addConstant(label, this.input, label);
-      });
 
-      try {
-        for (let s = 1; s <= this.servers; s++) {
-          for (let r = 1; r <= this.racks; r++) {
-            let label = `s${s}r${r}`;
-            this.output[label] = 0;
-            mySystem.addVariable(label, this.output, label);
-            //Ensure solution count is 0 or +ve
-            let cons = `${label} >= 0`;
-            console.debug("Going to add Constraint ", cons);
-            mySystem.addConstraint(cons);
-            //ensure count is integet :wink:[Not working ]
-            //cons = `10000000000*(${label}+1)/10000000000/(${label}+1) = 1`;
-            //console.debug("Going to add Constraint ", cons);
-            //mySystem.addConstraint(cons);
-          }
-        }
-        //Add constraints
-        for (let s = 1; s <= this.servers; s++) {
-          let cons = "";
-          for (let r = 1; r <= this.racks; r++) {
-            cons +=
-              `s${s}r${r}` + (r == this.racks ? ` >= s${s}count"` : " + ");
-          }
-          console.debug("Going to add Constraint ", cons);
-          mySystem.addConstraint(cons);
-        }
+      let model = [];
 
-        for (let r = 1; r <= this.racks; r++) {
-          let cons = "";
-          for (let s = 1; s <= this.servers; s++) {
-            cons +=
-              `s${s}r${r}*s${s}cap` +
-              (s == this.servers ? ` <= r${r}cap` : " + ");
-          }
-          console.debug("Going to add Constraint ", cons);
-          mySystem.addConstraint(cons);
-        }
-        //Setup Solution Hooks
-        mySystem.onNewSolution(solution => {
+      this.rackCaps.forEach((rackCap, rackInd) => {
+        let rackConstr = "";
+        this.serverCaps.forEach((modelCap, modelInd) => {
+          //Add Integer Constraints
+          model.push(`int ps${modelInd}.n${rackInd}.${modelInd}`);
+          //Add Model level Constraint
+          rackConstr += `${modelCap} ps${modelInd}.n${rackInd}.${modelInd} `;
+        });
+        model.push(`${rackConstr} <= ${rackCap}`);
+      });
+      let maxConstr = "max: ";
+      this.serverCounts.forEach((modelCount, modelInd) => {
+        let modelConstr = "";
+        this.rackCaps.forEach((rackCap, rackInd) => {
+          modelConstr += `${
+            this.serverCaps[modelInd]
+          } ps${modelInd}.n${rackInd}.${modelInd} `;
+          maxConstr += `${modelCount}  ps${modelInd}.n${rackInd}.${modelInd} `;
+        });
+        model.push(
+          `${modelConstr} = ${modelCount * this.serverCaps[modelInd]}`
+        );
+      });
+      model.push(maxConstr);
+
+      // Reformat to JSON model
+      model = solver.ReformatLP(model);
+
+      let results = solver.Solve(model);
+
+      if (results.feasible) {
+        this.output = results;
+        this.exportConfig();
+      } else {
+        alert(" Solution NOT Feasible!");
+      }
+
+      //Setup Solution Hooks
+      /*        mySystem.onNewSolution(solution => {
           this.busy = false;
           this.solution = solution;
         }, this.output);
         //resolve
         mySystem.resolve();
         //Ready for export
-        this.exportConfig();
+        
       } catch (error) {
         alert("Solution NOT Feasible");
         console.error(error);
         this.busy = false;
-      }
+      }*/
     },
     outputMat() {
       let mat = [];
-      for (let s = 1; s <= this.servers; s++) {
+      for (let s = 0; s < this.servers; s++) {
         let row = [];
-        for (let r = 1; r <= this.racks; r++) {
-          let label = `s${s}r${r}`;
+        for (let r = 0; r < this.racks; r++) {
+          let label = `ps${s}.n${r}.${s}`;
           row.push(this.output[label]);
         }
         mat.push(row);
