@@ -96,7 +96,7 @@ export default {
       input: {},
       output: {},
       busy: false,
-      appVersion: 180929
+      appVersion: 181113
     };
   },
   mounted() {},
@@ -214,21 +214,6 @@ export default {
       } else {
         alert(" Solution NOT Feasible!");
       }
-
-      //Setup Solution Hooks
-      /*        mySystem.onNewSolution(solution => {
-          this.busy = false;
-          this.solution = solution;
-        }, this.output);
-        //resolve
-        mySystem.resolve();
-        //Ready for export
-        
-      } catch (error) {
-        alert("Solution NOT Feasible");
-        console.error(error);
-        this.busy = false;
-      }*/
     },
     outputMat() {
       let mat = [];
